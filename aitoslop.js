@@ -74,25 +74,21 @@
                 return false;
             }
             
-            // Replace "AI" with "Slop" (case-insensitive, but preserve original case)
-            // Use negative lookbehind and lookahead to avoid "AI slop" patterns
-            const newText = originalText
-                .replace(/\bAI\b(?!\s+slop)/gi, function(match) {
-                    // Preserve original case
-                    if (match === 'AI') return 'Slop';
-                    if (match === 'ai') return 'slop';
-                    if (match === 'Ai') return 'Slop';
-                    if (match === 'aI') return 'slop';
-                    return 'Slop'; // fallback
-                });
-            
-            if (originalText !== newText) {
-                textNode.textContent = newText;
-                return true;
+    // Replace "AI" or "artificial intelligence" with "slop"/"Slop",
+    // but avoid already-slopped phrases like "AI slop"
+    const newText = originalText
+    .replace(
+        /\b(?:AI|artificial intelligence|artifical intelligence)\b(?!\s+slop)/gi,
+        (match) => slopWithCase(match)
+    );
+                
+                if (originalText !== newText) {
+                    textNode.textContent = newText;
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
-    }
     
     // Function to walk through all text nodes in the document
     function replaceTextInAllNodes(rootNode = document.body) {
@@ -172,6 +168,20 @@
         return observer;
     }
     
+    // Helper: apply the case style of `source` to the word "slop"
+    function slopWithCase(source) {
+    const base = 'slop';
+
+    // If the first letter is uppercase, capitalize "Slop"
+    // (covers AI, Ai, Artificial Intelligence, etc.)
+    if (source[0] === source[0].toUpperCase()) {
+        return base[0].toUpperCase() + base.slice(1);
+    }
+
+    // Otherwise, keep it lowercase
+    return base;
+    }
+
     // Main execution
     function performReplacements() {
         const replacements = replaceTextInAllNodes();
