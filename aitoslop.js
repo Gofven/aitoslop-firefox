@@ -6,8 +6,9 @@
 
     let isApplying = false;
 
-    const editableTags = new Set(['input', 'textarea', 'select', 'option']);
-    const skipTags = new Set(['script', 'style', 'noscript', 'code', 'pre']);
+    const editableTags = new Set(['textarea', 'select', 'option']);
+    const skipTags = new Set(['script', 'style', 'noscript', 'code', 'pre', 'input']);
+    const skipClasses = new Set(['QueryBuilder-StyledInputContent']);
     const editableRoles = new Set(['textbox', 'searchbox', 'combobox', 'spinbutton']);
 
     function isEditableElement(element) {
@@ -26,7 +27,6 @@
         'apple intelligence',
         'chatgpt',
         'artificial intelligence',
-        'ai slop',
         'ai[A-Z][a-z]+',
         '[A-Z][a-z]+ai',
         'a\\.i\\.',
@@ -54,11 +54,6 @@
                 return match.startsWith('A') ? 'Slop' : 'slop';
             }
 
-            if (lower.startsWith('ai') && lower.endsWith('slop')) {
-                const hasSlopUpper = match.includes('Slop');
-                return 'slop' + (hasSlopUpper ? 'Slop' : 'slop');
-            }
-
             if (match.startsWith('AI') && match.length > 2) {
                 return 'Slop' + match.slice(2);
             }
@@ -67,7 +62,7 @@
                 return match.slice(0, -2) + 'Slop';
             }
 
-            if (lower === 'a.i.' || lower === 'ai') {
+            if (lower === 'a.i.' || match === 'ai' || match === 'AI') {
                 return match[0] === 'A' ? 'Slop' : 'slop';
             }
 
@@ -83,12 +78,15 @@
         return false;
     }
 
+    const skipClassesSelector = skipClasses.size > 0 ? Array.from(skipClasses).map(c => `.${c}`).join(',') : null;
+
     function replaceTextInAllNodes(rootNode) {
         if (!rootNode) return;
         const walker = document.createTreeWalker(rootNode, NodeFilter.SHOW_TEXT, {
             acceptNode(node) {
                 const parent = node.parentElement;
                 if (!parent || skipTags.has(parent.tagName.toLowerCase()) || isEditableElement(parent)) return NodeFilter.FILTER_REJECT;
+                if (skipClassesSelector && parent.closest(skipClassesSelector)) return NodeFilter.FILTER_REJECT;
                 return NodeFilter.FILTER_ACCEPT;
             }
         });
