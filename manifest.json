@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "AI to Slop Replacer",
-  "version": "1.4.2",
-  "description": "A silly extension that replaces all textual occurences of 'AI' with 'Slop', including AI related branding on web pages!",
+  "version": "1.5",
+  "description": "A silly extension that replaces all textual occurences of 'AI' with 'Slop' on web pages!",
   
   "permissions": [
     "activeTab",
